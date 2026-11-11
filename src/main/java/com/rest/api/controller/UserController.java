@@ -8,27 +8,34 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
+  private static final Logger logger =
+          LoggerFactory.getLogger(UserController.class);
   @Autowired
   private UserRepository userRepository;
 
   @GetMapping
   public List<User> getAllUsers() {
-    return userRepository.findAll();
+      if (logger.isInfoEnabled()) logger.info("Fetching all users");
+      return userRepository.findAll();
+
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    logger.info("Fetching user with ID: {}", id);
     Optional<User> user = userRepository.findById(id);
     return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @PostMapping
   public User createUser(@RequestBody User user) {
+    logger.info("Creating a new user");
     return userRepository.save(user);
   }
 
@@ -48,6 +55,7 @@ public class UserController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    logger.info("Deleting user with ID: {}", id);
     Optional<User> user = userRepository.findById(id);
     if (user.isPresent()) {
       userRepository.delete(user.get());
